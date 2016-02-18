@@ -9,11 +9,10 @@ import java.util.ArrayList;
  * Created by Serhii on 18.02.2016.
  */
 public class Points {
-    public ArrayList<PointND> getIrises() {
-        return irises;
-    }
+
     final double ALPHA=0.5;
     private ArrayList<PointND> irises=new ArrayList<PointND>();
+
     public PointND get(int i) {
         if (i >= 0 && i < irises.size())
             return irises.get(i);
@@ -22,30 +21,20 @@ public class Points {
             return new PointND(0);
         }
     }
-    public void assignIrises(PointND z1,PointND z2,PointND z3)
+
+    public void assignIrises(ArrayList<PointND> centers)//assign vectors to closest center
     {
-        z1.setCategorized_claster(1);
-        z2.setCategorized_claster(2);
-        z3.setCategorized_claster(3);
+        setCategorizedId(centers);
         for (PointND irise : irises) {
-            if (irise.getX() == z1.getX() || irise.getX() == z2.getX() ||irise.getX() == z3.getX()) {
-                continue;
-            }
-            irise.set_cluster(z1, z2, z3);
-
-
+            if(inList(centers,irise)) continue;
+            int clusterId=IdClusterMinToCenters(centers,irise);
+            irise.setCategorized_cluster(clusterId);
         }
     }
 
-    public void assignIrises(ArrayList<PointND> centers)
-    {
+    private void setCategorizedId(ArrayList<PointND> centers) {
         for (int i = 0; i < centers.size(); i++) {
-            centers.get(i).setCategorized_claster(i+1);
-        }
-        for (PointND irise : irises) {
-            if(inList(centers,irise)) continue;
-            int clusterid=IdClusterMinToCenters(centers,irise);
-            irise.setCategorized_claster(clusterid);
+            centers.get(i).setCategorized_cluster(i+1);
         }
     }
 
@@ -71,26 +60,14 @@ public class Points {
         }
     }
 
-    public int findMaxDistance(PointND point) {
-        double maxDistance = 0;
-        int id = -1;
-        for (int i = 0; i < irises.size(); i++) {
 
-            if (point.distance(irises.get(i)) > maxDistance) {
-                maxDistance = point.distance(irises.get(i));
-                id = i;
-            }
-           // System.out.println(point.distance(irises.get(i))+" "+i);
-        }
-        return id;
-    }
 
     private static String workWithLine(ArrayList<PointND> irises, BufferedReader br, StringBuilder sb, String line) throws IOException {
         sb.append(line);
         sb.append(System.lineSeparator());
         line = br.readLine();
         if (line!=null &&line.length()>0)
-            irises.add(new PointND(line));
+            irises.add(new PointND(line,4));
         return line;
     }
 
@@ -101,83 +78,38 @@ public class Points {
 
     }
 
-    public void print(int claster) {
+    public void print(int cluster) {//print all with this id
         for (PointND irise : irises) {
-            if(irise.getCategorized_claster()==claster)
+            if(irise.getCategorized_cluster()==cluster)
             System.out.print(irise.getX()+" ");
         }
 
     }
 
-    public int findMaxDistance(PointND z1, PointND z2) {
-        double maxDistance = 0;
-        int id = -1;
-        for (int i = 0; i < irises.size(); i++) {
-            if (irises.get(i).getX() == z1.getX() || irises.get(i).getX() == z2.getX()) {
-                continue;
-            }
-            //не є центрами
-            double d1=z1.distance(irises.get(i));
-            double d2=z2.distance(irises.get(i));
-            double dmin=Math.min(d1,d2);
-            if (dmin > maxDistance) {
-                maxDistance = dmin;
-                id = i;
-            }
-            // System.out.println(point.distance(irises.get(i))+" "+i);
-        }
-        if (maxDistance<=ALPHA*z1.distance(z2)) {
-            System.out.println("Only 2 centers");
-            return -1;
-        }
-        return id;
-    }
 
-    public int findMaxDistance(PointND z1, PointND z2, PointND z3) {
+
+
+    public int findIdOfMaxDistance(ArrayList<PointND> centers) {
 
         double maxDistance = 0;
         int id = -1;
         for (int i = 0; i < irises.size(); i++) {
-
-            if (irises.get(i).getX() == z1.getX() || irises.get(i).getX() == z2.getX() || irises.get(i).getX() == z3.getX()) {
-                continue;
-            }
-            //не є центрами
-            double d1=z1.distance(irises.get(i));
-            double d2=z2.distance(irises.get(i));
-            double d3=z3.distance(irises.get(i));
-            double dmin=Math.min(d1,d2);
-            dmin=Math.min(dmin,d3);
-
-            if (dmin > maxDistance) {
-                maxDistance = dmin;
-                id = i;
-            }
-            // System.out.println(point.distance(irises.get(i))+" "+i);
-        }
-        double d_tipova=ALPHA*((z1.distance(z2)+z1.distance(z3)+z2.distance(z3))/3);
-        if (maxDistance<=d_tipova) {
-            System.out.println("Only 3 centers");
-            return -1;
-        }
-        return id;
-    }
-
-
-    public int findMaxDistance(ArrayList<PointND> centers) {
-
-        double maxDistance = 0;
-        int id = -1;
-        for (int i = 0; i < irises.size(); i++) {
+            //without centers
             if(inList(centers,irises.get(i))) continue;
 
+            //minimum distance from centers to point
             double dmin=minToCenters(centers,irises.get(i));
+
+            //maximum from all minimums
             if (dmin > maxDistance) {
                 maxDistance = dmin;
                 id = i;
             }
             // System.out.println(point.distance(irises.get(i))+" "+i);
         }
+
+        //check some conditions to add center or stop.
+
         double d_tipova=ALPHA*d_tipova(centers);
         if (maxDistance>d_tipova) {
             centers.add(irises.get(id));
@@ -207,7 +139,7 @@ public class Points {
         for (PointND center : centers) {
             double d = center.distance(pointND);
             if (dmin > d) {
-                id = center.getCategorized_claster();
+                id = center.getCategorized_cluster();
                 dmin = d;
             }
         }
@@ -224,4 +156,86 @@ public class Points {
         }
         return average/centers.size();
     }
+
+    public void assignIrises(PointND z1,PointND z2,PointND z3)
+    {
+        z1.setCategorized_cluster(1);
+        z2.setCategorized_cluster(2);
+        z3.setCategorized_cluster(3);
+        for (PointND irise : irises) {
+            if (irise.getX() == z1.getX() || irise.getX() == z2.getX() ||irise.getX() == z3.getX()) {
+                continue;
+            }
+            irise.set_cluster(z1, z2, z3);
+
+
+        }
+    }
+    public int findIdOfMaxDistance(PointND point) {
+        double maxDistance = 0;
+        int id = -1;
+        for (int i = 0; i < irises.size(); i++) {
+
+            if (point.distance(irises.get(i)) > maxDistance) {
+                maxDistance = point.distance(irises.get(i));
+                id = i;
+            }
+            // System.out.println(point.distance(irises.get(i))+" "+i);
+        }
+        return id;
+    }
+    public int findIdOfMaxDistance(PointND z1, PointND z2) {
+        double maxDistance = 0;
+        int id = -1;
+        for (int i = 0; i < irises.size(); i++) {
+            if (irises.get(i).getX() == z1.getX() || irises.get(i).getX() == z2.getX()) {
+                continue;
+            }
+            //не є центрами
+            double d1=z1.distance(irises.get(i));
+            double d2=z2.distance(irises.get(i));
+            double dmin=Math.min(d1,d2);
+            if (dmin > maxDistance) {
+                maxDistance = dmin;
+                id = i;
+            }
+            // System.out.println(point.distance(irises.get(i))+" "+i);
+        }
+        if (maxDistance<=ALPHA*z1.distance(z2)) {
+            System.out.println("Only 2 centers");
+            return -1;
+        }
+        return id;
+    }
+
+    public int findIdOfMaxDistance(PointND z1, PointND z2, PointND z3) {
+
+        double maxDistance = 0;
+        int id = -1;
+        for (int i = 0; i < irises.size(); i++) {
+
+            if (irises.get(i).getX() == z1.getX() || irises.get(i).getX() == z2.getX() || irises.get(i).getX() == z3.getX()) {
+                continue;
+            }
+            //не є центрами
+            double d1=z1.distance(irises.get(i));
+            double d2=z2.distance(irises.get(i));
+            double d3=z3.distance(irises.get(i));
+            double dmin=Math.min(d1,d2);
+            dmin=Math.min(dmin,d3);
+
+            if (dmin > maxDistance) {
+                maxDistance = dmin;
+                id = i;
+            }
+            // System.out.println(point.distance(irises.get(i))+" "+i);
+        }
+        double d_tipova=ALPHA*((z1.distance(z2)+z1.distance(z3)+z2.distance(z3))/3);
+        if (maxDistance<=d_tipova) {
+            System.out.println("Only 3 centers");
+            return -1;
+        }
+        return id;
+    }
+
 }

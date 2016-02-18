@@ -19,18 +19,18 @@ public class Main {
         while (lastid>=0)
         {
             System.out.println(lastid);
-            lastid=irises.findMaxDistance(centers);
+            lastid=irises.findIdOfMaxDistance(centers);
 
         }
 
         irises.assignIrises(centers);
 
-       // irises.print();
+        irises.print();
         System.out.println("\n"+centers.size());
 
         for (PointND center : centers) {
             System.out.println(center);
-            irises.print(center.getCategorized_claster());
+            irises.print(center.getCategorized_cluster());
             System.out.println();
         }
 
@@ -38,14 +38,14 @@ public class Main {
 
     private static void test() {
         //        PointND z1=irises.get(49);
-//        int q=irises.findMaxDistance(z1);//індекс найбільш віддаленого
+//        int q=irises.findIdOfMaxDistance(z1);//індекс найбільш віддаленого
 //        PointND z2=irises.get(q);
 //
-//        int qz=irises.findMaxDistance(z1,z2);
+//        int qz=irises.findIdOfMaxDistance(z1,z2);
 //        //System.out.println(qz);
 //        PointND xqz=irises.get(qz);
 //
-//        int qzz=irises.findMaxDistance(z1,z2,xqz);
+//        int qzz=irises.findIdOfMaxDistance(z1,z2,xqz);
 //        System.out.println(qzz);
 //        irises.assignIrises(z1,z2,xqz);
     }
