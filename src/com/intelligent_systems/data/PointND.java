@@ -1,6 +1,9 @@
-package com.intelligent_systems.maxmin;
+package com.intelligent_systems.data;
 
-import java.io.IOException;
+import com.sun.javafx.geom.Vec4d;
+import javafx.geometry.Point3D;
+
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -27,6 +30,10 @@ public class PointND {
 
     public PointND(int capacity) {
         X = new Vector<Double>(capacity);
+        for (int i = 0; i < capacity; i++) {
+            getX().add(i,0.0);
+
+        }
     }
     public void set_cluster(PointND z1, PointND z2, PointND z3) {
         double d1=z1.distance(this);
@@ -65,7 +72,26 @@ public class PointND {
         X = x;
     }
 
+    public PointND add(PointND Second)
+    {
+        PointND temp = new PointND(Second.X.size());
+        for (int i = 0; i < X.size(); i++) {
+         temp.X.set(i,X.get(i)+Second.X.get(i));
+        }
+       return temp;
+    }
+    public PointND setmidPoint(ArrayList <PointND> points)
+    {
+        PointND midPoint = new PointND(X.size());
+        for (PointND point : points) {
+           midPoint= midPoint.add(point);
+        }
 
+        for (int i = 0; i < midPoint.X.size(); i++) {
+            midPoint.X.set(i,midPoint.X.get(i)/points.size());
+        }
+       return midPoint;
+    }
     public double distance(PointND Second) {
         double sum_of_sqrs = 0;
         Iterator iter1 = X.iterator();
@@ -80,6 +106,11 @@ public class PointND {
     }
 
 
-
-
+    public double getDispersion(ArrayList<PointND> points_from_cluster) {
+        double dispersion=0.0;
+        for (PointND pointND : points_from_cluster) {
+            dispersion+=this.distance(pointND);
+        }
+        return dispersion/points_from_cluster.size();
+    }
 }

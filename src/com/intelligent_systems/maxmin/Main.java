@@ -1,6 +1,9 @@
 package com.intelligent_systems.maxmin;
 
 
+import com.intelligent_systems.data.PointND;
+import com.intelligent_systems.data.Points;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,7 +11,8 @@ import java.util.ArrayList;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        Points irises=new Points(new FileReader("iris.data.txt"));
+        Points irises=new Points(new FileReader("iris.data.txt"),4);
+       // Points irises=new Points(new FileReader("2d.txt"),3);
 
         ArrayList<PointND> centers=new ArrayList<PointND>();
       //  test();
@@ -25,12 +29,16 @@ public class Main {
 
         irises.assignIrises(centers);
 
-        irises.print();
+        //irises.print();
         System.out.println("\n"+centers.size());
 
         for (PointND center : centers) {
             System.out.println(center);
-            irises.print(center.getCategorized_cluster());
+
+            int count = irises.print(center.getCategorized_cluster());
+            System.out.println();
+
+            System.out.println("Count of cluster =" + count);
             System.out.println();
         }
 

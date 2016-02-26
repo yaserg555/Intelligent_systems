@@ -1,4 +1,4 @@
-package com.intelligent_systems.maxmin;
+package com.intelligent_systems.data;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
  */
 public class Points {
 
-    final double ALPHA=0.5;
+    final double ALPHA=0.9;
     private ArrayList<PointND> irises=new ArrayList<PointND>();
 
     public PointND get(int i) {
@@ -45,7 +45,7 @@ public class Points {
         this.irises = new ArrayList<PointND>();
     }
 
-    public Points(FileReader fileReader) throws IOException {
+    public Points(FileReader fileReader,int count) throws IOException {
 
         BufferedReader br = new BufferedReader(fileReader);
         try {
@@ -53,7 +53,7 @@ public class Points {
             String line = br.readLine();
             while (line != null) {
 
-                line = workWithLine(irises, br, sb, line);
+                line = workWithLine(irises, br, sb, line,count);
             }
         } finally {
             br.close();
@@ -62,12 +62,12 @@ public class Points {
 
 
 
-    private static String workWithLine(ArrayList<PointND> irises, BufferedReader br, StringBuilder sb, String line) throws IOException {
+    private static String workWithLine(ArrayList<PointND> irises, BufferedReader br, StringBuilder sb, String line, int count) throws IOException {
         sb.append(line);
         sb.append(System.lineSeparator());
         line = br.readLine();
         if (line!=null &&line.length()>0)
-            irises.add(new PointND(line,4));
+            irises.add(new PointND(line,count));
         return line;
     }
 
@@ -78,12 +78,15 @@ public class Points {
 
     }
 
-    public void print(int cluster) {//print all with this id
+    public int print(int cluster) {//print all with this id
+        int count = 0;
         for (PointND irise : irises) {
-            if(irise.getCategorized_cluster()==cluster)
-            System.out.print(irise.getX()+" ");
+            if (irise.getCategorized_cluster() == cluster) {
+                System.out.print(irise.getX() + " ");
+                count++;
+            }
         }
-
+        return count;
     }
 
 
@@ -117,6 +120,15 @@ public class Points {
         } else return -1;
     }
 
+    public ArrayList<PointND> getPointsFromCluster(int clusterId)
+    {
+        ArrayList<PointND> temp = new ArrayList<PointND>();
+        for (PointND irise : irises) {
+            if(irise.getCategorized_cluster()==clusterId)
+                temp.add(irise);
+        }
+        return temp;
+    }
     private boolean inList(ArrayList<PointND> centers, PointND pointND) {
         for (PointND center : centers) {
             if(center.distance(pointND)==0) return true;
